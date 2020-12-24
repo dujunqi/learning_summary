@@ -8,11 +8,13 @@
         <outputRelativeToContentRoot value="true" />
         <module name="filter_demo" />
         <module name="learning_summary" />
+        <module name="spring_security" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="filter_demo" target="1.8" />
       <module name="learning_summary" target="1.8" />
+      <module name="spring_security" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

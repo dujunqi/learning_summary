@@ -5,6 +5,7 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/filter_demo/pom.xml" />
+        <option value="$PROJECT_DIR$/spring_security/pom.xml" />
       </list>
     </option>
   </component>
