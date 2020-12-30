@@ -1,17 +1,15 @@
 package cn.itsource.spring_security.domain;
 
 import cn.itsource.spring_security.model.BaseEntity;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.Data;
 
 /**
  * @desciption:用途
  * @author: 杜俊圻
- * @date: 2020/12/29 17:08
+ * @date: 2020/12/30 14:33
  */
 @Data
-public class User extends BaseEntity {
-    private String name;
+public class UserInfo extends BaseEntity {
     private String userName;
-    private String passWord;
+    private String password;
 }

@@ -15,6 +15,4 @@ import javax.annotation.Resource;
  */
 @Service
 public class StudentServiceImpl extends BaseService<Student, Long, StudentMapper> implements StudentService {
-    @Resource
-    private StudentMapper helloMapper;
 }

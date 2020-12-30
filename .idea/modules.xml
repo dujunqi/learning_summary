@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/filter_demo/filter_demo.iml" filepath="$PROJECT_DIR$/filter_demo/filter_demo.iml" />
       <module fileurl="file://$PROJECT_DIR$/learning_summary.iml" filepath="$PROJECT_DIR$/learning_summary.iml" />
       <module fileurl="file://$PROJECT_DIR$/spring_security/spring_security.iml" filepath="$PROJECT_DIR$/spring_security/spring_security.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring_security_demo/spring_security_demo.iml" filepath="$PROJECT_DIR$/spring_security_demo/spring_security_demo.iml" />
     </modules>
   </component>
 </project>

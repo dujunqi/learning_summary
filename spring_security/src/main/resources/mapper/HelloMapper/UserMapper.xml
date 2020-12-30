@@ -4,7 +4,7 @@
     <resultMap id="BaseResultMap" type="cn.itsource.spring_security.domain.User">
         <id column="id" property="id" jdbcType="INTEGER"/>
         <result column="user_name" property="userName" jdbcType="TINYINT"/>
-        <result column="password" property="passWord" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
         <result column="name" property="name" jdbcType="VARCHAR"/>
     </resultMap>
 </mapper>
