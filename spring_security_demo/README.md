@@ -28,7 +28,7 @@
 
 ![Image text](src/main/resources/public/1.png)
 
-###登录认证
+###简单实现登录认证
 
 通过SpringSecurity提供的AuthenticationManagerBuilder认证管理器构建器中提供登录验证之一UserDetailsService实现登录认证
 ~~~java
@@ -59,6 +59,152 @@ public class UserServiceImpl extends BaseService<User, Long, UserMapper> impleme
     }
 }
 ~~~
-###自定义设置登录页面不需要认证即可访问
+###登陆认证及权限管理
+####1.创建WebSecurityConfigurerAdapter的子配置类用以配置springSecurity中的config
+~~~java
+    @Configuration
+    public class SecurityConfig extends WebSecurityConfigurerAdapter {
+        @Autowired
+        private MyUserDetailService userDetailsService;
+    
+        @Override
+            protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+                auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+            }
+        /*由于security启动时需要一个PasswordEncoder对象，所以在此处将这个对象交给Spring管理*/
+        @Bean
+        PasswordEncoder passwordEncoder(){
+            return new BCryptPasswordEncoder();
+        }
+    
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+          http.exceptionHandling().accessDeniedPage("/unAuth.html"); //设置无权限时用户访问的页面
+          http.logout().logoutUrl("/logout").logoutSuccessUrl("/test/hello").permitAll();//添加用户注销功能
+          http.formLogin()  //自定义自己编写的登录页面
+                  .loginPage("/login.html")          //登录页面设置
+                  .loginProcessingUrl("/user/login")  //登录访问路径
+                  /*.defaultSuccessUrl("/test/index").permitAll()//登陆成功之后，跳转路径*/
+                  .defaultSuccessUrl("/success.html").permitAll()//登陆成功之后，跳转路径
+                  .and().authorizeRequests().antMatchers("/","/test/hello","/user/login").permitAll()//设置哪些路径不需要认证
+                  //.anyRequest().authenticated()//所有的请求都已验证
+                  //.antMatchers("/test/index").hasAuthority("admins")//拦截/test/index请求验证该用户是否是admins权限
+                  //.antMatchers("/test/index").hasAnyAuthority("admins,manage")//拦截/test/index请求验证该用户是否含有admins或manage权限
+                  //.antMatchers("/test/index").hasRole("sale")//拦截/test/index请求验证该用户是否是sale角色
+                  .antMatchers("/test/index").hasAnyRole("sale,manager")//拦截/test/index请求验证该用户是否含有sale角色
+                  .userDetailsService(userDetailsService)//注入当前使用的userDetailsService对象,如果没有代码默认为Security自带的UserDetailsService
+                  .and().csrf().disable(); //关闭csrf防护
+        }
+    
+    }
+~~~
+####2.创建MVC中的controller
+~~~java
+@RestController
+@RequestMapping(value = "/test")
+public class HelloController {
+    @GetMapping(value = "/hello")
+    public String list() {
+        return "hello";
+    }
 
+    @GetMapping(value = "/index")
+    public String index() {
+        return "hello index";
+    }
+}
+~~~
+####3.创建静态资源
+~~~html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>-->
+    <meta charset="UTF-8">
+    <title>test</title>
+</head>
+<body>
+<h1>表单提交</h1>
+<!-- 表单提交用户信息,注意字段的设置,直接是*{} -->
+<form action="/user/login"  method="post">
+    <input type="text" name="username" />
+    <input type="text" name="password" />
+    <input type="submit" value="login"/>
+</form>
+</body>
+</html>
+~~~
 
+###rememberMe功能
+####原理：
+![Image text](src/main/resources/public/2.png)
+####1.在配置类中添加配置
+~~~java
+  @Configuration
+  public class SecurityConfig extends WebSecurityConfigurerAdapter {
+      @Autowired
+      private MyUserDetailService userDetailsService;
+      //由于rememberMe功能需要连接数据库存储token信息，因此需要注入数据库链接信息
+      @Autowired
+      private DataSource dataSource;
+      //配置对象
+      @Bean
+      public PersistentTokenRepository persistentTokenRepository(){
+          JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
+          jdbcTokenRepository.setDataSource(dataSource);//将pom中的jdbc配置传入jdbcToken容器中
+          //jdbcTokenRepository.setCreateTableOnStartup(true);//请求方法的时候创建persistent_logins表
+          return jdbcTokenRepository;
+      }
+  
+      @Override
+          protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+              auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+          }
+      @Bean
+      PasswordEncoder passwordEncoder(){
+          return new BCryptPasswordEncoder();
+      }
+  
+      @Override
+      protected void configure(HttpSecurity http) throws Exception {
+        http.exceptionHandling().accessDeniedPage("/unAuth.html"); //设置无权限时用户访问的页面
+        http.logout().logoutUrl("/logout").logoutSuccessUrl("/test/hello").permitAll();//添加用户注销功能
+        http.formLogin()  //自定义自己编写的登录页面
+                .loginPage("/login.html")          //登录页面设置
+                .loginProcessingUrl("/user/login")  //登录访问路径
+                /*.defaultSuccessUrl("/test/index").permitAll()//登陆成功之后，跳转路径*/
+                .defaultSuccessUrl("/success.html").permitAll()
+                .and().authorizeRequests().antMatchers("/","/test/hello","/user/login").permitAll()//设置哪些路径不需要认证
+                //.anyRequest().authenticated()//所有的请求都已验证
+                //.antMatchers("/test/index").hasAuthority("admins")//拦截/test/index请求验证该用户是否是admins权限
+                //.antMatchers("/test/index").hasAnyAuthority("admins,manage")//拦截/test/index请求验证该用户是否含有admins或manage权限
+                //.antMatchers("/test/index").hasRole("sale")//拦截/test/index请求验证该用户是否是sale角色
+                .antMatchers("/test/index").hasAnyRole("sale,manager")//拦截/test/index请求验证该用户是否含有sale角色
+                .and().rememberMe().tokenRepository(persistentTokenRepository())//配置rememberMe，注入数据库链接信息
+                .tokenValiditySeconds(60)//配置用户登录有效时长，单位为秒
+                .userDetailsService(userDetailsService)//注入当前使用的userDetailsService对象,如果没有代码默认为Security自带的UserDetailsService
+                .and().csrf().disable(); //关闭csrf防护
+      }
+}
+~~~
+####2.在静态资源中添加自动登录配置
+~~~html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>-->
+    <meta charset="UTF-8">
+    <title>test</title>
+</head>
+<body>
+<h1>表单提交</h1>
+<!-- 表单提交用户信息,注意字段的设置,直接是*{} -->
+<form action="/user/login"  method="post">
+    <input type="text" name="username" />
+    <input type="text" name="password" />
+    <input type="checkbox" name="remember-me" />自动登录<br/><!--name属性名称必须是remember-me-->
+    <input type="submit" value="login"/>
+</form>
+</body>
+</html>
+~~~
