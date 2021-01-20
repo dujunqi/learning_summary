@@ -7,7 +7,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="api_gateway" />
-        <module name="filter_demo" />
         <module name="learning_summary" />
         <module name="service_acl" />
         <module name="service_base" />

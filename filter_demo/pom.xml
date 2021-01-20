@@ -10,6 +10,7 @@
     </parent>
     <groupId>it.source</groupId>
     <artifactId>filter_demo</artifactId>
+    <packaging>pom</packaging>
     <version>0.0.1</version>
     <name>filter_demo</name>
     <description>Demo project for Spring Boot</description>
