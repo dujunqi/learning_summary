@@ -15,7 +15,7 @@ import java.io.IOException;
  * @author: 杜俊圻
  * @date: 2021/01/22 16:49
  */
-public class unauthEntryPoint implements AuthenticationEntryPoint {
+public class UnauthEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest httpServletRequest, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
         ResponseUtil.out(response, R.error());

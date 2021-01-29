@@ -1,7 +1,10 @@
 package cn.itsource.security.filter;
 
+import cn.itsource.security.entity.SecurityUser;
 import cn.itsource.security.entity.User;
 import cn.itsource.security.security.TokenManager;
+import cn.itsource.utils.utils.R;
+import cn.itsource.utils.utils.ResponseUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -14,6 +17,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -54,5 +59,22 @@ public class TokenLoginFilter extends UsernamePasswordAuthenticationFilter {
         }
 
     }
+    //认证成功调用的方法
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        //1、获取用户信息
+        SecurityUser user = (SecurityUser) authResult.getPrincipal();
+        //根据用户名生成token
+        String token = tokenManager.createToken(user.getCurrentUserInfo().getUsername());
+        //将用户名及权限列表放入redis
+        redisTemplate.opsForValue().set(user.getCurrentUserInfo().getUsername(),user.getPermissionValueList());
+        //返回token信息
+        ResponseUtil.out(response, R.ok().data("token",token));
+    }
 
+    //认证失败调用的方法
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        ResponseUtil.out(response, R.error());
+    }
 }
