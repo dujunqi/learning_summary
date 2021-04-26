@@ -7,7 +7,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="api_gateway" />
-        <module name="learning_summary" />
+        <module name="netty-bytefuffer" />
+        <module name="netty_bytebuffer" />
         <module name="service_acl" />
         <module name="service_base" />
         <module name="spring_security" />
@@ -21,6 +22,9 @@
       <module name="filter_demo" target="1.8" />
       <module name="infrastructure" target="1.8" />
       <module name="learning_summary" target="1.8" />
+      <module name="netty-bytebuffer" target="1.8" />
+      <module name="netty-bytefuffer" target="1.8" />
+      <module name="netty_bytebuffer" target="1.8" />
       <module name="service" target="1.8" />
       <module name="service_acl" target="1.8" />
       <module name="service_base" target="1.8" />
